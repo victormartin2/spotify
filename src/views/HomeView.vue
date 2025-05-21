@@ -1,9 +1,16 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+// Home view is just a wrapper for MainContent
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="home-view">
+    <!-- MainContent is rendered in App.vue -->
+  </div>
 </template>
+
+<style scoped>
+.home-view {
+  width: 100%;
+  height: 100%;
+}
+</style>

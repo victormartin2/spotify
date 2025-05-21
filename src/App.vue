@@ -1,85 +1,78 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { ref, onMounted, computed } from 'vue';
+import Sidebar from './components/Sidebar.vue';
+import TopBar from './components/TopBar.vue';
+import MainContent from './components/MainContent.vue';
+import Player from './components/Player.vue';
+import { usePlayerStore } from './stores/player';
+
+const playerStore = usePlayerStore();
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+  <div class="spotify-app">
+    <div class="main-container">
+      <Sidebar />
+      <div class="content-area">
+        <TopBar />
+        <MainContent />
+      </div>
     </div>
-  </header>
-
-  <RouterView />
+    <Player />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+body {
+  background-color: #000000;
+  color: #ffffff;
+  overflow: hidden;
 }
 
-nav {
+.spotify-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  background-color: #121212;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(18,18,18,0.8) 0%, #121212 100%);
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+::-webkit-scrollbar {
+  width: 12px;
 }
 
-nav a:first-of-type {
-  border: 0;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+  border: 3px solid #121212;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 </style>
