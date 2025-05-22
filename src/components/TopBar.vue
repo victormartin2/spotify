@@ -1,8 +1,13 @@
 <script setup>
 import { ref } from 'vue';
-import { Search, Bell, User } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
 
 const searchQuery = ref('');
+const router = useRouter();
+
+const navigateToSearch = () => {
+  router.push('/search');
+};
 </script>
 
 <template>
@@ -20,7 +25,7 @@ const searchQuery = ref('');
       </button>
     </div>
     
-    <div class="search-container">
+    <div class="search-container" @click="navigateToSearch">
       <div class="search-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
@@ -32,6 +37,7 @@ const searchQuery = ref('');
         class="search-input" 
         placeholder="¿Qué quieres reproducir?"
         v-model="searchQuery"
+        @click.stop="navigateToSearch"
       />
     </div>
     
@@ -90,6 +96,7 @@ const searchQuery = ref('');
 .search-container {
   position: relative;
   width: 364px;
+  cursor: pointer;
 }
 
 .search-icon {
@@ -108,6 +115,7 @@ const searchQuery = ref('');
   background-color: #ffffff;
   font-size: 14px;
   color: #121212;
+  cursor: pointer;
 }
 
 .search-input::placeholder {

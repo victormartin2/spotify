@@ -5,12 +5,19 @@ import TopBar from './components/TopBar.vue';
 import MainContent from './components/MainContent.vue';
 import Player from './components/Player.vue';
 import { usePlayerStore } from './stores/player';
+import { useRoute } from 'vue-router';
 
 const playerStore = usePlayerStore();
+const route = useRoute();
 
 // Limpiar el reproductor al desmontar el componente
 onUnmounted(() => {
   playerStore.cleanup();
+});
+
+// Determinar si mostrar el contenido principal o la vista de router
+const showMainContent = computed(() => {
+  return route.path === '/';
 });
 </script>
 
@@ -20,7 +27,8 @@ onUnmounted(() => {
       <Sidebar />
       <div class="content-area">
         <TopBar />
-        <MainContent />
+        <MainContent v-if="showMainContent" />
+        <router-view v-else />
       </div>
     </div>
     <Player />
