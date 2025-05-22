@@ -2,77 +2,200 @@ import { defineStore } from "pinia"
 import { ref, watch } from "vue"
 
 export const usePlayerStore = defineStore("player", () => {
-  const audio = new Audio()
+  // Estado del reproductor
   const currentSong = ref(null)
   const isPlaying = ref(false)
   const currentTime = ref(0)
   const duration = ref(0)
   const queue = ref([])
   const currentIndex = ref(-1)
+  const volume = ref(0.7)
 
-  // Update current time while playing
-  audio.addEventListener("timeupdate", () => {
-    currentTime.value = audio.currentTime
-  })
+  // YouTube player
+  let player = null
+  let playerReady = false
+  let playerInterval = null
 
-  // Update duration when metadata is loaded
-  audio.addEventListener("loadedmetadata", () => {
-    duration.value = audio.duration
-  })
+  // Inicializar YouTube API
+  const initYouTubeAPI = () => {
+    return new Promise((resolve) => {
+      // Si ya existe el script de la API, resolvemos inmediatamente
+      if (window.YT) {
+        resolve()
+        return
+      }
 
-  // Handle song end
-  audio.addEventListener("ended", () => {
-    next()
-  })
+      // Crear script para cargar la API de YouTube
+      const tag = document.createElement("script")
+      tag.src = "https://www.youtube.com/iframe_api"
+      const firstScriptTag = document.getElementsByTagName("script")[0]
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
 
-  // Watch for changes to currentSong and update audio source
-  watch(currentSong, (newSong) => {
+      // Cuando la API esté lista, resolver la promesa
+      window.onYouTubeIframeAPIReady = () => {
+        resolve()
+      }
+    })
+  }
+
+  // Crear el reproductor de YouTube
+  const createYouTubePlayer = () => {
+    // Si ya existe un player, lo destruimos
+    if (player) {
+      player.destroy()
+    }
+
+    // Crear un div para el player si no existe
+    let playerElement = document.getElementById("youtube-player")
+    if (!playerElement) {
+      playerElement = document.createElement("div")
+      playerElement.id = "youtube-player"
+      playerElement.style.position = "absolute"
+      playerElement.style.opacity = "0"
+      playerElement.style.pointerEvents = "none"
+      playerElement.style.height = "1px"
+      playerElement.style.width = "1px"
+      document.body.appendChild(playerElement)
+    }
+
+    // Crear el player
+    return new Promise((resolve) => {
+      player = new window.YT.Player("youtube-player", {
+        height: "1",
+        width: "1",
+        videoId: currentSong.value ? extractYouTubeId(currentSong.value.audioUrl) : "",
+        playerVars: {
+          playsinline: 1,
+          controls: 0,
+          disablekb: 1,
+          rel: 0,
+          modestbranding: 1,
+        },
+        events: {
+          onReady: () => {
+            playerReady = true
+            player.setVolume(volume.value * 100)
+            resolve()
+          },
+          onStateChange: (event) => {
+            // -1: no iniciado, 0: terminado, 1: reproduciendo, 2: pausado, 3: buffering, 5: video en cola
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              isPlaying.value = true
+              startTimeTracking()
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              isPlaying.value = false
+              stopTimeTracking()
+            } else if (event.data === window.YT.PlayerState.ENDED) {
+              next()
+            }
+          },
+        },
+      })
+    })
+  }
+
+  // Extraer el ID de YouTube de una URL
+  const extractYouTubeId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+    const match = url.match(regExp)
+    return match && match[2].length === 11 ? match[2] : null
+  }
+
+  // Iniciar seguimiento del tiempo de reproducción
+  const startTimeTracking = () => {
+    stopTimeTracking()
+    playerInterval = setInterval(() => {
+      if (player && playerReady) {
+        currentTime.value = player.getCurrentTime() || 0
+        duration.value = player.getDuration() || 0
+      }
+    }, 1000)
+  }
+
+  // Detener seguimiento del tiempo
+  const stopTimeTracking = () => {
+    if (playerInterval) {
+      clearInterval(playerInterval)
+      playerInterval = null
+    }
+  }
+
+  // Cargar canción actual en el reproductor
+  const loadCurrentSong = async () => {
+    if (!currentSong.value) return
+
+    if (!window.YT) {
+      await initYouTubeAPI()
+    }
+
+    if (!player) {
+      await createYouTubePlayer()
+    } else if (playerReady) {
+      const videoId = extractYouTubeId(currentSong.value.audioUrl)
+      player.loadVideoById(videoId)
+      player.pauseVideo()
+    }
+  }
+
+  // Watch para cambios en la canción actual
+  watch(currentSong, async (newSong) => {
     if (newSong) {
-      audio.src = newSong.audioUrl
-      audio.load()
+      await loadCurrentSong()
       if (isPlaying.value) {
-        audio.play()
+        play()
       }
     }
   })
 
-  // Play the current song
-  const play = () => {
-    if (currentSong.value) {
-      audio
-        .play()
-        .then(() => {
-          isPlaying.value = true
-        })
-        .catch((error) => {
-          console.error("Error playing audio:", error)
-        })
+  // Watch para cambios en el volumen
+  watch(volume, (newVolume) => {
+    if (player && playerReady) {
+      player.setVolume(newVolume * 100)
+    }
+  })
+
+  // Reproducir
+  const play = async () => {
+    if (!currentSong.value) return
+
+    if (!player || !playerReady) {
+      await loadCurrentSong()
+    }
+
+    if (player && playerReady) {
+      player.playVideo()
+      isPlaying.value = true
     }
   }
 
-  // Pause the current song
+  // Pausar
   const pause = () => {
-    audio.pause()
-    isPlaying.value = false
-  }
-
-  // Seek to a specific time
-  const seek = (time) => {
-    if (audio.src) {
-      audio.currentTime = time
+    if (player && playerReady) {
+      player.pauseVideo()
+      isPlaying.value = false
     }
   }
 
-  // Set the volume (0-1)
-  const setVolume = (volume) => {
-    audio.volume = volume
+  // Buscar una posición específica
+  const seek = (time) => {
+    if (player && playerReady) {
+      player.seekTo(time, true)
+    }
   }
 
-  // Set the current song
+  // Establecer volumen
+  const setVolume = (newVolume) => {
+    volume.value = newVolume
+    if (player && playerReady) {
+      player.setVolume(newVolume * 100)
+    }
+  }
+
+  // Establecer canción actual
   const setCurrentSong = (song) => {
     currentSong.value = song
 
-    // Add to queue if not already in it
+    // Añadir a la cola si no está ya
     const songIndex = queue.value.findIndex((s) => s.id === song.id)
     if (songIndex === -1) {
       queue.value.push(song)
@@ -82,47 +205,53 @@ export const usePlayerStore = defineStore("player", () => {
     }
   }
 
-  // Play the next song in the queue
+  // Siguiente canción
   const next = () => {
     if (queue.value.length === 0) return
 
     if (currentIndex.value < queue.value.length - 1) {
       currentIndex.value++
       currentSong.value = queue.value[currentIndex.value]
-      play()
     } else {
-      // Loop back to the beginning
+      // Volver al principio
       currentIndex.value = 0
       currentSong.value = queue.value[0]
-      play()
     }
   }
 
-  // Play the previous song in the queue
+  // Canción anterior
   const previous = () => {
     if (queue.value.length === 0) return
 
-    // If we're more than 3 seconds into the song, restart it
+    // Si llevamos más de 3 segundos, reiniciar la canción
     if (currentTime.value > 3) {
-      audio.currentTime = 0
+      seek(0)
       return
     }
 
     if (currentIndex.value > 0) {
       currentIndex.value--
       currentSong.value = queue.value[currentIndex.value]
-      play()
     } else {
-      // Loop to the end
+      // Ir al final
       currentIndex.value = queue.value.length - 1
       currentSong.value = queue.value[currentIndex.value]
-      play()
     }
   }
 
-  // Add a song to the queue
+  // Añadir a la cola
   const addToQueue = (song) => {
     queue.value.push(song)
+  }
+
+  // Limpiar al desmontar
+  const cleanup = () => {
+    stopTimeTracking()
+    if (player) {
+      player.destroy()
+      player = null
+      playerReady = false
+    }
   }
 
   return {
@@ -131,6 +260,7 @@ export const usePlayerStore = defineStore("player", () => {
     currentTime,
     duration,
     queue,
+    volume,
     play,
     pause,
     seek,
@@ -139,5 +269,6 @@ export const usePlayerStore = defineStore("player", () => {
     next,
     previous,
     addToQueue,
+    cleanup,
   }
 })

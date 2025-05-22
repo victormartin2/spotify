@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import Sidebar from './components/Sidebar.vue';
 import TopBar from './components/TopBar.vue';
 import MainContent from './components/MainContent.vue';
@@ -7,6 +7,11 @@ import Player from './components/Player.vue';
 import { usePlayerStore } from './stores/player';
 
 const playerStore = usePlayerStore();
+
+// Limpiar el reproductor al desmontar el componente
+onUnmounted(() => {
+  playerStore.cleanup();
+});
 </script>
 
 <template>

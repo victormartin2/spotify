@@ -7,52 +7,52 @@ import { usePlayerStore } from '../stores/player';
 const trendingSongs = ref([
   {
     id: 1,
-    title: 'DROGA',
-    artist: 'Mora, C.Tangana',
+    title: 'Duki: Givenchy',
+    artist: 'Duki',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+    audioUrl: 'https://youtu.be/l9HkcHxu8MI'
   },
   {
     id: 2,
-    title: 'no tiene sentido',
-    artist: 'Beéle',
+    title: 'Quevedo: Columbia',
+    artist: 'Quevedo',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+    audioUrl: 'https://youtu.be/NH4W8BOaSiE'
   },
   {
     id: 3,
-    title: 'Esa Diva',
-    artist: 'Melody',
+    title: 'Feid, Young Miko: Classy 101',
+    artist: 'Feid, Young Miko',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+    audioUrl: 'https://youtu.be/2J9xYVcP4MA'
   },
   {
     id: 4,
-    title: 'Espresso Macchiato',
-    artist: 'Tommy Cash',
+    title: 'Myke Towers: LALA',
+    artist: 'Myke Towers',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3'
+    audioUrl: 'https://youtu.be/o6aJJ6Q5zhg'
   },
   {
     id: 5,
-    title: 'Hiekka',
-    artist: 'Nicky Jam, Beéle',
+    title: 'Bad Bunny: MONACO',
+    artist: 'Bad Bunny',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3'
+    audioUrl: 'https://youtu.be/0B1ujEFubrE'
   },
   {
     id: 6,
-    title: 'REMEDIO',
-    artist: 'JC Reyes, Pirlo',
+    title: 'Rauw Alejandro: TOCAME',
+    artist: 'Rauw Alejandro',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3'
+    audioUrl: 'https://youtu.be/BN51wp_7cq8'
   },
   {
     id: 7,
-    title: 'Te Colaboro - Remix',
-    artist: 'Bray, Feid, De La Rose, Yan Block',
+    title: 'Karol G: S91',
+    artist: 'Karol G',
     cover: '/placeholder.svg?height=200&width=200',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3'
+    audioUrl: 'https://youtu.be/OHAZHNFh4nU'
   }
 ]);
 
@@ -84,12 +84,12 @@ const popularArtists = ref([
   },
   {
     id: 6,
-    name: 'JC Reyes',
+    name: 'Duki',
     image: '/placeholder.svg?height=200&width=200'
   },
   {
     id: 7,
-    name: 'W Sound',
+    name: 'Feid',
     image: '/placeholder.svg?height=200&width=200'
   }
 ]);

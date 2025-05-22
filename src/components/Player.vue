@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { usePlayerStore } from '../stores/player';
 
 const playerStore = usePlayerStore();
+
 const currentTime = computed(() => playerStore.currentTime);
 const duration = computed(() => playerStore.duration);
 const isPlaying = computed(() => playerStore.isPlaying);
 const currentSong = computed(() => playerStore.currentSong);
-const volume = ref(0.7);
+const volume = ref(playerStore.volume);
 
 const formatTime = (seconds) => {
   if (isNaN(seconds) || seconds === 0) return '0:00';
@@ -54,6 +55,21 @@ const prevSong = () => {
   playerStore.previous();
 };
 
+// Extraer el ID de YouTube para la miniatura
+const getYouTubeThumbnail = (url) => {
+  if (!url) return '';
+  
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  const videoId = (match && match[2].length === 11) ? match[2] : null;
+  
+  if (videoId) {
+    return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+  }
+  
+  return '';
+};
+
 onMounted(() => {
   playerStore.setVolume(volume.value);
 });
@@ -63,7 +79,11 @@ onMounted(() => {
   <div class="player">
     <div class="now-playing">
       <div v-if="currentSong" class="song-info">
-        <img :src="currentSong.cover" :alt="currentSong.title" class="song-cover" />
+        <img 
+          :src="getYouTubeThumbnail(currentSong.audioUrl)" 
+          :alt="currentSong.title" 
+          class="song-cover" 
+        />
         <div class="song-details">
           <h4 class="song-title">{{ currentSong.title }}</h4>
           <p class="song-artist">{{ currentSong.artist }}</p>
@@ -198,6 +218,7 @@ onMounted(() => {
   height: 56px;
   border-radius: 4px;
   margin-right: 14px;
+  object-fit: cover;
 }
 
 .placeholder-cover {
